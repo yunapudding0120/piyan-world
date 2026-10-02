@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>皮炎裡的世界 ‧ 互動生態探測儀</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&display=swap');
+        
+        body {
+            font-family: 'Zen Maru Gothic', sans-serif;
+            background: linear-gradient(180deg, #70d6ff 0%, #e7c6ff 45%, #ffd6ff 70%, #b5e2fa 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* 太陽光芒與彩虹動畫 */
+        .sun-rays {
+            background: radial-gradient(circle, rgba(255,223,0,0.8) 0%, rgba(255,183,3,0.2) 60%, rgba(255,255,255,0) 80%);
+            animation: pulseSun 4s infinite alternate ease-in-out;
+        }
+
+        @keyframes pulseSun {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            100% { transform: scale(1.1); opacity: 1; }
+        }
+
+        /* 搖曳小花動畫 */
+        .flower-bounce {
+            animation: bounceFlower 3s infinite ease-in-out;
+            transform-origin: bottom center;
+        }
+
+        @keyframes bounceFlower {
+            0%, 100% { transform: rotate(-5deg); }
+            50% { transform: rotate(5deg); }
+        }
+
+        /* 長條圖動畫 */
+        .bar-fill {
+            transition: width 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* 草地波浪 */
+        .grass-bg {
+            background: #7bf1a8;
+            border-top-left-radius: 50% 20px;
+            border-top-right-radius: 50% 20px;
+        }
+    </style>
+</head>
+<body class="relative pb-24 text-gray-800">
+
+    <!-- 背景彩虹與太陽裝飾 -->
+    <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <!-- 太陽 -->
+        <div class="absolute -top-12 -left-12 w-48 h-48 rounded-full sun-rays flex items-center justify-center">
+            <span class="text-6xl animate-spin" style="animation-duration: 20s;">☀️</span>
+        </div>
+        <!-- 彩虹拱門弧光 -->
+        <div class="absolute -top-32 left-1/2 -translate-x-1/2 w-[600px] h-[300px] rounded-t-full border-[16px] border-pink-300 opacity-40 blur-sm"></div>
+        <div class="absolute -top-28 left-1/2 -translate-x-1/2 w-[560px] h-[280px] rounded-t-full border-[16px] border-yellow-200 opacity-40 blur-sm"></div>
+        <div class="absolute -top-24 left-1/2 -translate-x-1/2 w-[520px] h-[260px] rounded-t-full border-[16px] border-blue-200 opacity-40 blur-sm"></div>
+    </div>
+
+    <!-- 主體內容容器 -->
+    <div class="relative z-10 max-w-xl mx-auto px-4 pt-8">
+        
+        <!-- 標題卡片 -->
+        <div class="text-center bg-white/80 backdrop-blur-md rounded-3xl p-6 shadow-xl border-4 border-white mb-6 transform hover:scale-101 transition-all">
+            <div class="inline-block bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-400 text-white font-black text-xs px-4 py-1 rounded-full uppercase tracking-widest mb-2 shadow">
+                🌈 陽光活潑生態探測器
+            </div>
+            <h1 class="text-3xl md:text-4xl font-black text-pink-600 drop-shadow-sm flex items-center justify-center gap-2">
+                🌸 皮炎裡的世界 🌸
+            </h1>
+            <p class="text-gray-600 font-bold text-sm mt-2">
+                輸入姓名與生日，探索獨一無二的皮炎宇宙！<br>
+                <span class="text-xs text-pink-500 font-medium">✨ 相同姓名+生日，100% 測出完全相同的結果 ✨</span>
+            </p>
+        </div>
+
+        <!-- 表單卡片 -->
+        <div class="bg-white/90 backdrop-blur-md rounded-3xl p-6 shadow-xl border-4 border-yellow-200 mb-8">
+            <form id="detectForm" onsubmit="handleDetect(event)" class="space-y-4">
+                <div>
+                    <label class="block text-gray-700 font-bold text-sm mb-1 ml-1">👤 你的姓名：</label>
+                    <input type="text" id="userName" required placeholder="請輸入姓名 (例: 王小明)" 
+                        class="w-full px-4 py-3 rounded-2xl border-2 border-pink-200 focus:border-pink-400 focus:outline-none font-bold text-gray-700 bg-pink-50/50">
+                </div>
+                <div>
+                    <label class="block text-gray-700 font-bold text-sm mb-1 ml-1">🎂 你的生日：</label>
+                    <input type="date" id="userBirthday" required 
+                        class="w-full px-4 py-3 rounded-2xl border-2 border-pink-200 focus:border-pink-400 focus:outline-none font-bold text-gray-700 bg-pink-50/50">
+                </div>
+                <button type="submit" 
+                    class="w-full py-4 bg-gradient-to-r from-yellow-400 via-pink-400 to-purple-400 hover:from-yellow-300 hover:to-purple-300 text-white font-black text-lg rounded-2xl shadow-lg transform active:scale-95 transition-all flex items-center justify-center gap-2 border-2 border-white">
+                    🔍 開始探測皮炎生態！
+                </button>
+            </form>
+        </div>
+
+        <!-- 測驗結果區域 -->
+        <div id="resultContainer" class="hidden space-y-6">
+            
+            <!-- 數據綜覽卡片 -->
+            <div class="bg-white/95 backdrop-blur-md rounded-3xl p-6 shadow-2xl border-4 border-pink-300">
+                <div class="text-center mb-6">
+                    <span id="resultTitle" class="text-2xl font-black text-purple-600 bg-purple-100 px-4 py-1.5 rounded-full inline-block mb-2"></span>
+                    <h2 class="text-xl font-bold text-gray-700">皮炎幾何學與生態探測報告</h2>
+                </div>
+
+                <!-- 尺寸與深度卡片 (合理化範圍) -->
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div class="bg-gradient-to-br from-pink-50 to-red-50 p-4 rounded-2xl border border-pink-200 text-center shadow-inner">
+                        <div class="text-xs font-bold text-pink-500 mb-1">皮炎直徑大小</div>
+                        <div id="diameterVal" class="text-2xl font-black text-pink-600">-- cm</div>
+                        <div id="diameterRef" class="text-[11px] font-bold text-pink-400 mt-1">--</div>
+                    </div>
+                    <div class="bg-gradient-to-br from-purple-50 to-indigo-50 p-4 rounded-2xl border border-purple-200 text-center shadow-inner">
+                        <div class="text-xs font-bold text-purple-500 mb-1">皮炎探測深度</div>
+                        <div id="depthVal" class="text-2xl font-black text-purple-600">-- cm</div>
+                        <div id="depthRef" class="text-[11px] font-bold text-purple-400 mt-1">--</div>
+                    </div>
+                </div>
+
+                <!-- 構造成分長條圖 (對數歸一化) -->
+                <div class="space-y-4 mb-6">
+                    <h3 class="text-md font-black text-gray-700 flex items-center gap-1">
+                        📊 構造成分對數視覺圖 <span class="text-xs font-normal text-gray-400">(對數 Scale 歸一化)</span>
+                    </h3>
+
+                    <!-- 成分 1: 黃金巨蟒 -->
+                    <div>
+                        <div class="flex justify-between text-xs font-bold mb-1">
+                            <span>💩 黃金巨蟒 (屎)</span>
+                            <span id="snakeVal" class="text-amber-600">0 kg</span>
+                        </div>
+                        <div class="w-full bg-gray-100 rounded-full h-4 overflow-hidden border border-gray-200 p-0.5">
+                            <div id="snakeBar" class="bar-fill bg-gradient-to-r from-amber-400 to-yellow-600 h-full rounded-full" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <!-- 成分 2: 脫落的大腸細胞 -->
+                    <div>
+                        <div class="flex justify-between text-xs font-bold mb-1">
+                            <span>🦠 脫落的大腸細胞</span>
+                            <span id="cellVal" class="text-emerald-600">0 個</span>
+                        </div>
+                        <div class="w-full bg-gray-100 rounded-full h-4 overflow-hidden border border-gray-200 p-0.5">
+                            <div id="cellBar" class="bar-fill bg-gradient-to-r from-emerald-400 to-teal-600 h-full rounded-full" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <!-- 成分 3: 食物殘渣 -->
+                    <div>
+                        <div class="flex justify-between text-xs font-bold mb-1">
+                            <span id="foodName">🍲 食物殘渣</span>
+                            <span id="foodVal" class="text-orange-600">0 粒</span>
+                        </div>
+                        <div class="w-full bg-gray-100 rounded-full h-4 overflow-hidden border border-gray-200 p-0.5">
+                            <div id="foodBar" class="bar-fill bg-gradient-to-r from-orange-400 to-red-500 h-full rounded-full" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 味道與情緒調性 -->
+                <div class="bg-amber-50/70 rounded-2xl p-4 border border-amber-200 mb-6 space-y-2">
+                    <h3 class="text-xs font-black text-amber-800 uppercase tracking-wider flex items-center gap-1">
+                        👃 皮炎情緒風味調性 (前/中/後調)
+                    </h3>
+                    <div id="aromaText" class="text-sm font-bold text-amber-900 leading-relaxed"></div>
+                </div>
+
+                <!-- 米其林評語 -->
+                <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-4 border border-purple-200 mb-6">
+                    <h3 class="text-xs font-black text-purple-800 uppercase tracking-wider flex items-center gap-1 mb-1">
+                        🍽️ 米其林三星評審特評
+                    </h3>
+                    <p id="michelinComment" class="text-sm font-bold text-purple-900 leading-relaxed italic"></p>
+                </div>
+
+                <!-- 操作按鈕區 -->
+                <div class="space-y-3">
+                    <button onclick="downloadResultCard()" 
+                        class="w-full py-3.5 bg-emerald-500 hover:bg-emerald-600 text-white font-black rounded-2xl shadow-md transition-all flex items-center justify-center gap-2">
+                        🖼️ 下載測驗結果圖片 (PNG)
+                    </button>
+                    <button onclick="copyShareText()" 
+                        class="w-full py-3 bg-blue-500 hover:bg-blue-600 text-white font-black rounded-2xl shadow-md transition-all flex items-center justify-center gap-2 text-sm">
+                        📋 複製文字測驗報告
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- 底部裝飾草地與搖曳小花 -->
+        <div class="mt-12 text-center pb-8">
+            <div class="flex justify-center items-end gap-6 text-3xl mb-2">
+                <span class="flower-bounce" style="animation-delay: 0s;">🌸</span>
+                <span class="flower-bounce text-4xl" style="animation-delay: 0.5s;">🌼</span>
+                <span class="flower-bounce" style="animation-delay: 0.2s;">🌺</span>
+                <span class="flower-bounce text-4xl" style="animation-delay: 0.7s;">🌻</span>
+            </div>
+            <p class="text-xs font-bold text-gray-500">© 皮炎裡的世界 ‧ 陽光綠地彩虹探測局</p>
+        </div>
+
+    </div>
+
+    <!-- 圖片彈窗 (用於備用下載降級機制) -->
+    <div id="imageModal" class="fixed inset-0 bg-black/80 z-50 hidden flex flex-col items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-4 max-w-md w-full text-center space-y-3">
+            <h3 class="font-black text-gray-800 text-lg">📸 請長按下方圖片儲存</h3>
+            <div class="max-h-[70vh] overflow-y-auto rounded-2xl border">
+                <img id="modalImg" class="w-full h-auto rounded-xl shadow-md" src="" alt="測驗結果卡片">
+            </div>
+            <button onclick="closeModal()" class="w-full py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold rounded-xl text-sm">
+                關閉彈窗
+            </button>
+        </div>
+    </div>
+
+    <!-- 隱藏 Canvas 用於繪製 PNG 圖卡 -->
+    <canvas id="exportCanvas" class="hidden"></canvas>
+
+    <script>
+        // 100 種食物殘渣資料庫
+        const FOOD_DATABASE = [
+            "珍珠奶茶的珍珠", "明天見的金針菇", "火鍋鴨血渣", "鹹酥雞九層塔", "鳳梨酥餅乾屑",
+            "麻辣鍋花椒粒", "玉米濃湯粒", "火龍果黑籽", "草莓表面小黑籽", "蒙古烤肉洋蔥絲",
+            "大腸包小腸糯米粒", "臭豆腐泡菜渣", "泰式打拋豬辣椒籽", "日式拉麵木耳絲", "韓式泡菜辣椒粉",
+            "綠豆湯綠豆皮", "紅豆餅紅豆殼", "芭樂白色的籽", "百香果果肉籽", "奇異果黑籽",
+            "豬血糕花生粉", "豬腳花生殼", "碳烤玉米粒", "地瓜球地瓜皮", "糖葫蘆山楂核碎片",
+            "蒜泥白肉蒜碎", "薑母鴨薑渣", "羊肉爐當歸渣", "肉圓筍絲", "碗粿菜脯碎",
+            "蚵仔煎茼蒿葉", "潤餅花生糖粉", "胡椒餅蔥花", "牛肉麵酸菜渣", "滷肉飯紅蔥頭",
+            "生魚片山葵渣", "章魚燒柴魚片碎", "天婦羅麵衣酥", "壽司海苔碎片", "日式納豆渣",
+            "越式麵包小黃瓜皮", "月亮蝦餅蝦殼碎", "印度咖哩茴香籽", "墨西哥塔可餅玉米渣", "義大利麵義式香草碎",
+            "披薩起司焦皮", "美式薯條馬鈴薯皮", "吉事漢堡黃芥末籽", "紐奧良雞翅黑胡椒粒", "燕麥奶燕麥麩皮",
+            "黑芝麻湯圓芝麻粒", "白芝麻燒餅籽", "腰果果碎", "核桃微苦外皮", "開心果綠色碎屑", "夏威夷豆碎粒", "杏仁片碎片", "花生湯軟花生渣", "松子碎粒", "葵花子殼渣",
+            "芒果纖維絲", "鳳梨酸甜纖維", "甘蔗咀嚼纖維", "橘子白絲絡", "柚子果肉胞粒",
+            "柳丁果肉殘渣", "蘋果微脆果皮", "水蜜桃絨毛皮", "葡萄紫紅果皮", "櫻桃果肉碎片",
+            "小番茄外皮", "苦瓜薄皮", "青椒小籽", "茄子紫皮", "絲瓜網狀纖維",
+            "冬瓜果肉渣", "南瓜子碎片", "芋頭甜湯芋頭泥", "山藥黏液纖維", "蓮藕微孔纖維",
+            "黑木耳碎片", "白木耳膠質渣", "香菇傘蓋碎粒", "杏鮑菇纖維絲", "鴻喜菇菌傘",
+            "海帶芽碎片", "紫菜湯紫菜碎片", "昆布海藻渣", "羊棲菜細絲", "海苔醬殘渣",
+            "皮蛋蛋黃泥", "鹹鴨蛋黃碎粒", "飛魚卵微粒", "明太子薄膜", "鮭魚卵皮",
+            "小干貝纖維", "蝦米鬚鬚", "丁香魚骨頭", "螃蟹膏泥", "蚌蚵泥渣"
+        ];
+
+        // 50+ 種情緒香氣調性詞庫 (前調、中調、後調)
+        const AROMA_TOP = ["焦慮不安的", "微醺悲傷的", "雀躍爆發的", "憂鬱暴躁的", "暴怒狂熱的", "傲嬌委屈的", "佛系平靜的", "迷茫興奮的", "慵懶厭世的", "浪漫狂喜的"];
+        const AROMA_MID = ["九層塔蒜香", "腐乳起司濃香", "老麻辣花椒香", "日式醬油焦香", "泰式酸辣檸檬香", "黑胡椒奶油香", "紅蔥頭油酥香", "熱帶百香果果香", "濃郁煙燻柴魚香", "松露奶油純香"];
+        const AROMA_BASE = ["帶著淡淡的炭焙烏龍餘韻", "伴隨濃烈的九層塔回甘", "散發持久的蒜泥後勁", "拖著迷人的臭豆腐餘香", "交織著微甜的花生粉尾韻", "夾雜著勁爆的青椒後味", "蘊含著沉穩的黑芝麻香味", "流露著甜美的黑糖風味", "隱約浮現經典的當歸溫香", "帶來提神的薄荷清涼尾味"];
+
+        // 50+ 種米其林評語庫
+        const MICHELIN_COMMENTS = [
+            "這是一道充滿層次感的皮炎藝術作品，整體氣味完美融合，堪稱大自然最震撼的發酵饗宴。",
+            "結構完整，風味豐富！每一粒食物殘渣都在皮炎深度中展現了生命的奇蹟與深度。",
+            "風味強烈且極具侵略性，前調衝擊鼻腔，中調沉穩深邃，後調令人久久無法忘懷。",
+            "絕妙的氣味平衡！將情緒調性與微生物代謝產物揉合得天衣無縫，值得三星推薦。",
+            "口感（氣味）極富張力，質地濃密而富有彈性，展現了極高水平的腸道烹飪工藝。",
+            "充滿神秘感的一款生態腔調，入口（聞起來）帶著詩意的優雅與暴烈，令人讚嘆。",
+            "這不僅是皮炎，這是一座活生生的美食博物館，完美保留了食物最原始的精髓。",
+            "渾然天成的沉浸式氣味饗宴，深度的掌控恰到好處，帶來無與倫比的視覺與嗅覺震撼。",
+            "極具後現代主義風格的皮炎構造成分，各種細節環環相扣，展現出驚人的生命力。",
+            "完美呈現了大地發酵的真諦，味道溫潤而富有個性，是不可多得的皮炎奇蹟作品。"
+        ];
+
+        // 直徑與深度幽默參照物 (合理化範圍)
+        const DIAMETER_REFS = ["約一枚 10 元硬幣大小", "約一枚 50 元硬幣大小", "相當於一顆好吃的章魚燒", "相當於高爾夫球的截面", "約莫是一顆乒乓球大小"];
+        const DEPTH_REFS = ["約一支護唇膏的長度", "相當於一根台式小香腸", "約莫是一張信用卡的高度", "約一支標準馬克杯的高度", "相當於一支短鋼筆的長度"];
+
+        // 確定性 Seeded PRNG - cyrb53 Hash 演算法
+        function cyrb53(str, seed = 0) {
+            let h1 = 0xdeadbeef ^ seed, h2 = 0x41c6ce57 ^ seed;
+            for (let i = 0, ch; i < str.length; i++) {
+                ch = str.charCodeAt(i);
+                h1 = Math.imul(h1 ^ ch, 2654435761);
+                h2 = Math.imul(h2 ^ ch, 1597334677);
+            }
+            h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+            h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+            return (h2 >>> 0) * 4294967296 + (h1 >>> 0);
+        }
+
+        // Mulberry32 偽隨機數產生器
+        function mulberry32(a) {
+            return function() {
+              var t = a += 0x6D2B79F5;
+              t = Math.imul(t ^ t >>> 15, t | 1);
+              t ^= t + Math.imul(t ^ t >>> 8, t | 31);
+              return ((t ^ t >>> 14) >>> 0) / 4294967296;
+            }
+        }
+
+        let globalDetectData = null;
+
+        // 探測按鈕觸發主邏輯
+        function handleDetect(e) {
+            e.preventDefault();
+            const name = document.getElementById('userName').value.trim();
+            const birthday = document.getElementById('userBirthday').value;
+
+            if (!name || !birthday) return;
+
+            // 1. 生成確定性亂數種子
+            const seed = cyrb53(`${name}_${birthday}`);
+            const rng = mulberry32(seed);
+
+            // 2. 算定各項數值 (合理化範圍)
+            const diameter = (1.2 + rng() * 4.3).toFixed(1); // 1.2 cm ~ 5.5 cm
+            const depth = (3.0 + rng() * 9.0).toFixed(1);    // 3.0 cm ~ 12.0 cm
+
+            const diameterRef = DIAMETER_REFS[Math.floor(rng() * DIAMETER_REFS.length)];
+            const depthRef = DEPTH_REFS[Math.floor(rng() * DEPTH_REFS.length)];
+
+            // 數值懸殊構造成分
+            const snakeKg = (0.2 + rng() * 4.8).toFixed(2); // 0.2 ~ 5.0 kg
+            const cellCount = Math.floor(10000000 + rng() * 990000000); // 10,000,000 ~ 1,000,000,000 個
+            const foodCount = Math.floor(5 + rng() * 800); // 5 ~ 805 粒
+
+            // 隨機抽題 (100 種食物、前中後調香氣、米其林評語)
+            const foodName = FOOD_DATABASE[Math.floor(rng() * FOOD_DATABASE.length)];
+            const aroma = `前調帶著【${AROMA_TOP[Math.floor(rng() * AROMA_TOP.length)]}${AROMA_MID[Math.floor(rng() * AROMA_MID.length)]}】，中調綻放【${AROMA_TOP[Math.floor(rng() * AROMA_TOP.length)]}${AROMA_MID[Math.floor(rng() * AROMA_MID.length)]}】，後調則是${AROMA_BASE[Math.floor(rng() * AROMA_BASE.length)]}。`;
+            const comment = `“${MICHELIN_COMMENTS[Math.floor(rng() * MICHELIN_COMMENTS.length)]} 尤其是探測到的『${foodName}』，更為整體增添了靈魂樂章！”`;
+
+            // 保存全域資料
+            globalDetectData = {
+                name, birthday, diameter, depth, diameterRef, depthRef,
+                snakeKg, cellCount, foodCount, foodName, aroma, comment
+            };
+
+            // 3. 渲染至 DOM
+            document.getElementById('resultTitle').innerText = `${name} 的皮炎宇宙`;
+            document.getElementById('diameterVal').innerText = `${diameter} cm`;
+            document.getElementById('diameterRef').innerText = diameterRef;
+            document.getElementById('depthVal').innerText = `${depth} cm`;
+            document.getElementById('depthRef').innerText = depthRef;
+
+            document.getElementById('snakeVal').innerText = `${snakeKg} kg`;
+            document.getElementById('cellVal').innerText = `${cellCount.toLocaleString()} 個`;
+            document.getElementById('foodName').innerText = `🍲 食物殘渣 (${foodName})`;
+            document.getElementById('foodVal').innerText = `${foodCount} 粒`;
+
+            // 4. 計算 Log Scale 長條圖寬度 (歸一化轉換，解決懸殊問題)
+            const logSnake = Math.log10(parseFloat(snakeKg) * 100 + 1); // scale ~ 1-3
+            const logCell = Math.log10(cellCount + 1);                 // scale ~ 7-9
+            const logFood = Math.log10(foodCount + 1);                 // scale ~ 1-3
+
+            const maxLog = Math.max(logSnake, logCell, logFood);
+            
+            // 保持一定視覺最低條長 (最少 15%)
+            const snakeBarWidth = Math.max(15, (logSnake / maxLog) * 100);
+            const cellBarWidth = Math.max(15, (logCell / maxLog) * 100);
+            const foodBarWidth = Math.max(15, (logFood / maxLog) * 100);
+
+            // DOM 渲染長條圖
+            setTimeout(() => {
+                document.getElementById('snakeBar').style.width = `${snakeBarWidth}%`;
+                document.getElementById('cellBar').style.width = `${cellBarWidth}%`;
+                document.getElementById('foodBar').style.width = `${foodBarWidth}%`;
+            }, 100);
+
+            document.getElementById('aromaText').innerText = aroma;
+            document.getElementById('michelinComment').innerText = comment;
+
+            // 顯示結果面板並滾動
+            const resultBox = document.getElementById('resultContainer');
+            resultBox.classList.remove('hidden');
+            resultBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // 繪製與下載 高清 PNG 卡片 (原生 Canvas 技術)
+        function downloadResultCard() {
+            if (!globalDetectData) return;
+
+            const canvas = document.getElementById('exportCanvas');
+            const ctx = canvas.getContext('2d');
+
+            // 1. 設定高清解析度 800 x 1150
+            canvas.width = 800;
+            canvas.height = 1150;
+
+            // 背景天空漸層
+            const bgGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            bgGradient.addColorStop(0, '#70d6ff');
+            bgGradient.addColorStop(0.5, '#e7c6ff');
+            bgGradient.addColorStop(1, '#7bf1a8');
+            ctx.fillStyle = bgGradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 白色結果卡片主體
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+            ctx.roundRect(40, 50, 720, 1050, 30);
+            ctx.fill();
+            ctx.lineWidth = 6;
+            ctx.strokeStyle = '#f472b6';
+            ctx.stroke();
+
+            // 標題
+            ctx.fillStyle = '#db2777';
+            ctx.font = 'bold 38px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(`🌸 ${globalDetectData.name} 的皮炎宇宙探測報告 🌸`, 400, 120);
+
+            ctx.fillStyle = '#6b7280';
+            ctx.font = 'bold 20px sans-serif';
+            ctx.fillText(`生日: ${globalDetectData.birthday} ‧ 陽光彩虹獨家認證`, 400, 160);
+
+            // 幾何數據 (直徑 & 深度)
+            ctx.fillStyle = '#fce7f3';
+            ctx.roundRect(70, 190, 310, 120, 20);
+            ctx.fill();
+            ctx.fillStyle = '#db2777';
+            ctx.font = 'bold 20px sans-serif';
+            ctx.fillText('皮炎直徑大小', 225, 225);
+            ctx.font = 'black 36px sans-serif';
+            ctx.fillText(`${globalDetectData.diameter} cm`, 225, 270);
+
+            ctx.fillStyle = '#f3e8ff';
+            ctx.roundRect(420, 190, 310, 120, 20);
+            ctx.fill();
+            ctx.fillStyle = '#7e22ce';
+            ctx.font = 'bold 20px sans-serif';
+            ctx.fillText('皮炎探測深度', 575, 225);
+            ctx.font = 'black 36px sans-serif';
+            ctx.fillText(`${globalDetectData.depth} cm`, 575, 270);
+
+            // 構造成分 (對數長條圖)
+            ctx.textAlign = 'left';
+            ctx.fillStyle = '#374151';
+            ctx.font = 'bold 24px sans-serif';
+            ctx.fillText('📊 構造成分 (對數歸一化比例)', 70, 360);
+
+            // 巨蟒
+            ctx.font = 'bold 18px sans-serif';
+            ctx.fillText(`💩 黃金巨蟒 (屎): ${globalDetectData.snakeKg} kg`, 70, 400);
+            ctx.fillStyle = '#e5e7eb';
+            ctx.roundRect(70, 410, 660, 20, 10);
+            ctx.fill();
+            ctx.fillStyle = '#d97706';
+            ctx.roundRect(70, 410, Math.max(50, (Math.log10(parseFloat(globalDetectData.snakeKg)*100+1) / 9) * 660), 20, 10);
+            ctx.fill();
+
+            // 細胞
+            ctx.fillStyle = '#374151';
+            ctx.fillText(`🦠 脫落的大腸細胞: ${globalDetectData.cellCount.toLocaleString()} 個`, 70, 465);
+            ctx.fillStyle = '#e5e7eb';
+            ctx.roundRect(70, 475, 660, 20, 10);
+            ctx.fill();
+            ctx.fillStyle = '#059669';
+            ctx.roundRect(70, 475, Math.max(50, (Math.log10(globalDetectData.cellCount+1) / 9) * 660), 20, 10);
+            ctx.fill();
+
+            // 食物殘渣
+            ctx.fillStyle = '#374151';
+            ctx.fillText(`🍲 食物殘渣 (${globalDetectData.foodName}): ${globalDetectData.foodCount} 粒`, 70, 530);
+            ctx.fillStyle = '#e5e7eb';
+            ctx.roundRect(70, 540, 660, 20, 10);
+            ctx.fill();
+            ctx.fillStyle = '#ea580c';
+            ctx.roundRect(70, 540, Math.max(50, (Math.log10(globalDetectData.foodCount+1) / 9) * 660), 20, 10);
+            ctx.fill();
+
+            // 情緒味道調性
+            ctx.fillStyle = '#fffbeb';
+            ctx.roundRect(70, 590, 660, 170, 20);
+            ctx.fill();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#fcd34d';
+            ctx.stroke();
+
+            ctx.fillStyle = '#b45309';
+            ctx.font = 'bold 22px sans-serif';
+            ctx.fillText('👃 皮炎情緒風味調性', 90, 630);
+
+            ctx.fillStyle = '#78350f';
+            ctx.font = '18px sans-serif';
+            wrapText(ctx, globalDetectData.aroma, 90, 670, 620, 28);
+
+            // 米其林評語
+            ctx.fillStyle = '#faf5ff';
+            ctx.roundRect(70, 780, 660, 220, 20);
+            ctx.fill();
+            ctx.strokeStyle = '#e9d5ff';
+            ctx.stroke();
+
+            ctx.fillStyle = '#6b21a8';
+            ctx.font = 'bold 22px sans-serif';
+            ctx.fillText('🍽️ 米其林三星評審特評', 90, 820);
+
+            ctx.fillStyle = '#581c87';
+            ctx.font = 'italic 18px sans-serif';
+            wrapText(ctx, globalDetectData.comment, 90, 860, 620, 28);
+
+            // 頁尾
+            ctx.fillStyle = '#9ca3af';
+            ctx.font = 'bold 18px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('🌈 皮炎裡的世界 ‧ 陽光綠地彩虹探測網頁 🌈', 400, 1060);
+
+            // 導出 PNG 圖片
+            try {
+                canvas.toBlob((blob) => {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `皮炎裡的世界_${globalDetectData.name}.png`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+
+                    // 手機端備用彈窗降級機制
+                    document.getElementById('modalImg').src = url;
+                }, 'image/png');
+            } catch (err) {
+                // 若被安全性阻擋則開啟圖片彈窗供長按下載
+                openModal();
+            }
+        }
+
+        // Canvas 換行輔助函式
+        function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+            const words = text.split('');
+            let line = '';
+            for (let n = 0; n < words.length; n++) {
+                let testLine = line + words[n];
+                let metrics = ctx.measureText(testLine);
+                let testWidth = metrics.width;
+                if (testWidth > maxWidth && n > 0) {
+                    ctx.fillText(line, x, y);
+                    line = words[n];
+                    y += lineHeight;
+                } else {
+                    line = testLine;
+                }
+            }
+            ctx.fillText(line, x, y);
+        }
+
+        // 複製文字報告
+        function copyShareText() {
+            if (!globalDetectData) return;
+            const text = `【皮炎裡的世界】探測報告出爐！\n👤 姓名：${globalDetectData.name}\n📏 直徑：${globalDetectData.diameter} cm (${globalDetectData.diameterRef})\n🕳️ 深度：${globalDetectData.depth} cm (${globalDetectData.depthRef})\n💩 黃金巨蟒：${globalDetectData.snakeKg} kg\n🦠 大腸細胞：${globalDetectData.cellCount.toLocaleString()} 個\n🍲 食物殘渣：${globalDetectData.foodName} (${globalDetectData.foodCount} 粒)\n👃 風味：${globalDetectData.aroma}\n🍽️ 米其林評語：${globalDetectData.comment}`;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                alert('已成功複製完整的皮炎生態文字報告！');
+            }).catch(() => {
+                alert('複製失敗，請手動截圖分享！');
+            });
+        }
+
+        function openModal() {
+            document.getElementById('imageModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('imageModal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
